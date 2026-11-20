@@ -1,0 +1,199 @@
+classDiagram
+direction TB
+
+class ScheduleType {
+  <<enumeration>>
+  ASSIGNMENT
+  EXAM
+  STUDY
+  PERSONAL
+}
+
+class Lecture {
+  -id: String
+  -subject: String
+  -day: DayOfWeek
+  -start: LocalTime
+  -end: LocalTime
+  -room: String
+  +overlaps(other: Lecture) boolean
+}
+
+class Schedule {
+  -id: String
+  -type: ScheduleType
+  -title: String
+  -date: LocalDate
+  -start: LocalTime
+  -end: LocalTime
+  -done: boolean
+  -examId: String
+  +isTimed() boolean
+}
+
+class DayEntries {
+  -lectures: List~Lecture~
+  -schedules: List~Schedule~
+}
+
+class ScheduleBook {
+  -lectures: List~Lecture~
+  -schedules: List~Schedule~
+  +addLecture(lecture: Lecture) void
+  +updateLecture(lecture: Lecture) void
+  +removeLecture(lecture: Lecture) void
+  +findOverlap(lecture: Lecture) Lecture
+  +add(schedule: Schedule) void
+  +addAll(list: List~Schedule~) void
+  +update(schedule: Schedule) void
+  +remove(schedule: Schedule) void
+  +removeUndoneStudy(exam: Schedule) void
+  +findByMonth(month: YearMonth) List~Schedule~
+  +findByDate(date: LocalDate) DayEntries
+  +findDueTomorrow(today: LocalDate) List~Schedule~
+  +getAll() DayEntries
+}
+
+class ShareData {
+  -name: String
+  -exportedAt: LocalDate
+  -progress: Integer
+  -titleIncluded: boolean
+  -lectures: List~Lecture~
+  -schedules: List~Schedule~
+}
+
+class Friend {
+  -data: ShareData
+  +getName() String
+  +isOutdated(today: LocalDate) boolean
+}
+
+class FriendBook {
+  -friends: Map~String, Friend~
+  +findByName(name: String) Friend
+  +put(friend: Friend) void
+  +remove(friend: Friend) void
+  +getAll() List~Friend~
+}
+
+class Progress {
+  -total: int
+  -done: int
+  -percent: int
+  -overdue: List~Schedule~
+  +hasData() boolean
+}
+
+class ProgressCalculator {
+  -WINDOW_DAYS: int = 14
+  +calculate(schedules: List~Schedule~, today: LocalDate) Progress
+  -isCounted(schedule: Schedule, today: LocalDate) boolean
+}
+
+class ScheduleRepository {
+  -filePath: String
+  +save(book: ScheduleBook) void
+  +load() ScheduleBook
+}
+
+class FriendRepository {
+  -filePath: String
+  +save(friends: FriendBook) void
+  +load() FriendBook
+}
+
+class ShareFileManager {
+  +write(file: File, data: ShareData) boolean
+  +read(file: File) ShareData
+  -validate(json: String) boolean
+}
+
+class TimeSlot {
+  -date: LocalDate
+  -start: LocalTime
+  -end: LocalTime
+  -busyCount: int
+}
+
+class FreeTimeResult {
+  -busyCount: int[][]
+  -memberCount: int
+  -allFree: boolean
+  -recommendations: List~TimeSlot~
+}
+
+class FreeTimeFinder {
+  -SLOT_MINUTES: int = 30
+  +findFreeTime(members: List~ShareData~, week: LocalDate, from: LocalTime, to: LocalTime) FreeTimeResult
+  -countBusy(members: List~ShareData~, week: LocalDate, from: LocalTime, to: LocalTime) int[][]
+  -recommend(busy: int[][], memberCount: int) List~TimeSlot~
+}
+
+class ScheduleController {
+  -book: ScheduleBook
+  -repository: ScheduleRepository
+  -planner: StudyPlanner
+  -calculator: ProgressCalculator
+  -lastError: String
+  +loadMonth(month: YearMonth) List~Schedule~
+  +loadDay(date: LocalDate) DayEntries
+  +addLecture(lecture: Lecture) boolean
+  +updateLecture(lecture: Lecture) boolean
+  +deleteLecture(lecture: Lecture) void
+  +addSchedule(schedule: Schedule) boolean
+  +addExam(exam: Schedule, goal: StudyGoal) boolean
+  +updateSchedule(schedule: Schedule) boolean
+  +deleteSchedule(schedule: Schedule) boolean
+  +setDone(schedule: Schedule, done: boolean) void
+  +getProgress() Progress
+  +getLastError() String
+  -validate(lecture: Lecture) boolean
+}
+
+class ShareController {
+  -scheduleBook: ScheduleBook
+  -friendBook: FriendBook
+  -fileManager: ShareFileManager
+  -friendRepository: FriendRepository
+  -finder: FreeTimeFinder
+  -calculator: ProgressCalculator
+  +exportSchedule(name: String, includeTitle: boolean, file: File) boolean
+  +importFriend(file: File) boolean
+  +getFriends() List~Friend~
+  +deleteFriend(friend: Friend) boolean
+  +findCommonFreeTime(friends: List~Friend~, week: LocalDate, from: LocalTime, to: LocalTime) FreeTimeResult
+  -buildMyShareData(name: String, includeTitle: boolean) ShareData
+}
+
+class StudyPlanner {
+  <<다른 파트: 공부량 할당>>
+  +allocate(exam: Schedule, goal: StudyGoal) List~Schedule~
+}
+
+Schedule --> "1" ScheduleType
+ScheduleBook *-- "0..*" Lecture
+ScheduleBook *-- "0..*" Schedule
+DayEntries --> "0..*" Lecture
+DayEntries --> "0..*" Schedule
+ShareData *-- "0..*" Lecture
+ShareData *-- "0..*" Schedule
+Friend *-- "1" ShareData
+FriendBook *-- "0..*" Friend
+FreeTimeResult *-- "0..*" TimeSlot
+ScheduleRepository --> ScheduleBook
+FriendRepository --> FriendBook
+ShareFileManager --> ShareData
+FreeTimeFinder --> FreeTimeResult
+ScheduleController --> "1" ScheduleBook
+ScheduleController --> "1" ScheduleRepository
+ScheduleController --> "1" StudyPlanner
+ShareController --> "1" ScheduleBook
+ShareController --> "1" FriendBook
+ShareController --> "1" ShareFileManager
+ShareController --> "1" FriendRepository
+ShareController --> "1" FreeTimeFinder
+ShareController --> "1" ProgressCalculator
+ScheduleController --> "1" ProgressCalculator
+ProgressCalculator --> Progress
+Progress --> "0..*" Schedule
