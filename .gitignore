@@ -4,3 +4,5 @@ bin/
 *.iml 
 build/ 
 .DS_Store 
+out/
+data/
