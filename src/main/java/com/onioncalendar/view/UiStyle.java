@@ -156,9 +156,9 @@ public final class UiStyle {
     }
 
     /** 범례용 색 사각형 아이콘 */
-    static final class SwatchIcon implements javax.swing.Icon {
+    public static final class SwatchIcon implements javax.swing.Icon {
         private final Color fill, line;
-        SwatchIcon(Color fill, Color line) { this.fill = fill; this.line = line; }
+        public SwatchIcon(Color fill, Color line) { this.fill = fill; this.line = line; }
         @Override public void paintIcon(java.awt.Component c, Graphics g, int x, int y) {
             g.setColor(fill); g.fillRect(x, y, 11, 11);
             g.setColor(line); g.drawRect(x, y, 11, 11);

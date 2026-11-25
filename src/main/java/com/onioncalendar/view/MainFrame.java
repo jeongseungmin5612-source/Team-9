@@ -26,6 +26,8 @@ public class MainFrame extends JFrame {
     public static final String TIMETABLE = "timetable";
     public static final String SHARE = "share";
     public static final String SETTINGS = "settings";
+    /** 공유 화면에서 들어가는 공통 공강시간 화면 (상단 메뉴에는 없음, 공유 메뉴가 선택된 상태) */
+    public static final String FREE_TIME = "freetime";
 
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel cards = new JPanel(cardLayout);
@@ -83,7 +85,8 @@ public class MainFrame extends JFrame {
 
     public void showPanel(String name) {
         cardLayout.show(cards, name);
-        navButtons.forEach((k, b) -> b.setSelected(k.equals(name)));
+        String menu = FREE_TIME.equals(name) ? SHARE : name;
+        navButtons.forEach((k, b) -> b.setSelected(k.equals(menu)));
         addButton.setVisible(CALENDAR.equals(name));
     }
 

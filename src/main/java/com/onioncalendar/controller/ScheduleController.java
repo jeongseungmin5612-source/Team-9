@@ -46,6 +46,29 @@ public class ScheduleController {
         return true;
     }
 
+    /** 수업 수정: old를 지우고 updated를 넣는다. 겹치면 그대로 두고 false. */
+    public boolean updateLecture(Lecture old, Lecture updated) {
+        if (!validate(updated)) return false;
+        book.removeLecture(old);
+        Lecture overlap = book.findOverlap(updated);
+        if (overlap != null) {
+            book.add(old);
+            lastError = "\"" + overlap.getSubject() + "\" 수업과 시간이 겹칩니다.";
+            return false;
+        }
+        book.add(updated);
+        saveAndNotify();
+        return true;
+    }
+
+    public void deleteLecture(Lecture l) {
+        book.removeLecture(l);
+        saveAndNotify();
+    }
+
+    /** 시간표 화면용: 등록된 수업 전체 */
+    public List<Lecture> getLectures() { return book.getLectures(); }
+
     /** 과제·개인 일정 추가. 시험은 addExam을 쓴다. */
     public boolean addSchedule(Schedule s) {
         if (s.getType() == ScheduleType.EXAM || s.getType() == ScheduleType.STUDY) {
