@@ -1,0 +1,115 @@
+classDiagram
+direction TB
+
+class CalendarPanel {
+  <<JPanel>>
+  -controller: ScheduleController
+  -currentMonth: YearMonth
+  +refresh() void
+  -showMonth(month: YearMonth) void
+  -onDateClicked(date: LocalDate) void
+  -onAddSchedule() void
+}
+
+class DayDetailDialog {
+  <<JDialog>>
+  -date: LocalDate
+  -entries: DayEntries
+  -onScheduleClicked(schedule: Schedule) void
+}
+
+class ScheduleDetailDialog {
+  <<JDialog>>
+  -schedule: Schedule
+  -onDoneToggled(done: boolean) void
+  -onEdit() void
+  -onDelete() void
+}
+
+class ScheduleFormDialog {
+  <<JDialog>>
+  -editing: Schedule
+  -defaultDate: LocalDate
+  -onTypeChanged(type: ScheduleType) void
+  -onSave() void
+}
+
+class TimetablePanel {
+  <<JPanel>>
+  +refresh() void
+  -onAddLecture() void
+  -onLectureClicked(lecture: Lecture) void
+}
+
+class LectureFormDialog {
+  <<JDialog>>
+  -editing: Lecture
+  -onSave() void
+  -onDelete() void
+}
+
+class SharePanel {
+  <<JPanel>>
+  -controller: ShareController
+  +refreshFriends() void
+  +confirmReplace(name: String) boolean
+  -onExport() void
+  -onImport() void
+  -onFindFreeTime() void
+  -onFriendSelected(friend: Friend) void
+}
+
+class ExportDialog {
+  <<JDialog>>
+  -nameField: JTextField
+  -includeTitleBox: JCheckBox
+  -onSave() void
+}
+
+class FreeTimePanel {
+  <<JPanel>>
+  -result: FreeTimeResult
+  -onFind() void
+  -drawGrid(result: FreeTimeResult) void
+  -onAddAsSchedule(slot: TimeSlot) void
+}
+
+class FriendInfoDialog {
+  <<JDialog>>
+  -friend: Friend
+  -showTimetable() void
+  -showOnion() void
+  -onDeleteFriend() void
+}
+
+class ScheduleController {
+  <<controller>>
+}
+
+class ShareController {
+  <<controller>>
+}
+
+class Onion {
+  <<다른 파트: 양파>>
+}
+
+CalendarPanel --> ScheduleController
+CalendarPanel --> DayDetailDialog
+CalendarPanel --> ScheduleFormDialog
+DayDetailDialog --> ScheduleDetailDialog
+ScheduleDetailDialog --> ScheduleController
+ScheduleDetailDialog --> ScheduleFormDialog
+ScheduleFormDialog --> ScheduleController
+TimetablePanel --> ScheduleController
+TimetablePanel --> LectureFormDialog
+LectureFormDialog --> ScheduleController
+SharePanel --> ShareController
+SharePanel --> ExportDialog
+SharePanel --> FreeTimePanel
+SharePanel --> FriendInfoDialog
+ExportDialog --> ShareController
+FreeTimePanel --> ShareController
+FreeTimePanel --> ScheduleFormDialog
+FriendInfoDialog --> ShareController
+FriendInfoDialog --> Onion
